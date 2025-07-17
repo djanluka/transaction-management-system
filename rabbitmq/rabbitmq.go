@@ -11,7 +11,6 @@ import (
 type RabbitMQ struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
-	// Add other fields you might need (queues, exchanges, etc.)
 }
 
 var (
@@ -71,16 +70,6 @@ func (r *RabbitMQ) Close() error {
 
 	instance = nil // Reset instance to allow reconnection if needed
 	return err
-}
-
-// GetChannel returns the AMQP channel
-func (r *RabbitMQ) GetChannel() *amqp.Channel {
-	return r.channel
-}
-
-// GetConnection returns the AMQP connection
-func (r *RabbitMQ) GetConnection() *amqp.Connection {
-	return r.conn
 }
 
 func (r *RabbitMQ) Publish(queueName string, body string) error {
