@@ -3,11 +3,13 @@ package consumer
 import (
 	"fmt"
 	"log"
+	"transaction-management-system/database"
 	"transaction-management-system/rabbitmq"
 )
 
 type Consumer struct {
 	RabbitMQ *rabbitmq.RabbitMQ
+	Database *database.Database
 }
 
 func NewConsumer(amqpURI string) *Consumer {
@@ -16,8 +18,14 @@ func NewConsumer(amqpURI string) *Consumer {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
 
+	db, err := database.GetDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to Database: %v", err)
+	}
+
 	return &Consumer{
 		RabbitMQ: rmq,
+		Database: db,
 	}
 }
 
