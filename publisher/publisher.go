@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 	"transaction-management-system/rabbitmq"
+	"transaction-management-system/transaction"
 )
 
 type Publisher struct {
@@ -24,13 +25,13 @@ func NewPublisher(amqpURI string) *Publisher {
 
 func (p *Publisher) StartPublish(queueName string) {
 	for i := 0; i < 5; i++ {
-		message := fmt.Sprintf("Hello World %d", i)
-		err := p.RabbitMQ.Publish(queueName, message)
+		transaction := transaction.NewTransaction()
+		err := p.RabbitMQ.Publish(queueName, transaction)
 		if err != nil {
 			log.Printf("Failed to publish message: %v", err)
 			continue
 		}
-		fmt.Printf(" [x] Sent: %s\n", message)
+		fmt.Printf(" [x] Sent: %s\n", transaction)
 		time.Sleep(1 * time.Second)
 	}
 	fmt.Println("Publisher finished sending messages")

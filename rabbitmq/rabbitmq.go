@@ -1,8 +1,10 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
+	"transaction-management-system/transaction"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -72,7 +74,7 @@ func (r *RabbitMQ) Close() error {
 	return err
 }
 
-func (r *RabbitMQ) Publish(queueName string, body string) error {
+func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction) error {
 	_, err := r.channel.QueueDeclare(
 		queueName, // name
 		false,     // durable
@@ -85,13 +87,19 @@ func (r *RabbitMQ) Publish(queueName string, body string) error {
 		return fmt.Errorf("failed to declare a queue: %v", err)
 	}
 
+	// Marshal to JSON
+	body, err := json.Marshal(transaction)
+	if err != nil {
+		return fmt.Errorf("failed to marshal transaction: %v", err)
+	}
+
 	err = r.channel.Publish(
 		"",        // exchange
 		queueName, // routing key
 		false,     // mandatory
 		false,     // immediate
 		amqp.Publishing{
-			ContentType: "text/plain",
+			ContentType: "application/json",
 			Body:        []byte(body),
 		})
 	if err != nil {

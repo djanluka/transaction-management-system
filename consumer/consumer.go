@@ -1,10 +1,12 @@
 package consumer
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"transaction-management-system/database"
 	"transaction-management-system/rabbitmq"
+	"transaction-management-system/transaction"
 )
 
 type Consumer struct {
@@ -38,6 +40,12 @@ func (c *Consumer) Consume(queueName string) {
 
 	fmt.Println("Consumer started. Waiting for messages...")
 	for msg := range msgs {
-		fmt.Printf(" [x] Received: %s\n", msg.Body)
+		var transaction transaction.Transaction
+		err := json.Unmarshal(msg.Body, &transaction)
+		if err != nil {
+			log.Printf("Error decoding transaction: %s", err)
+			continue
+		}
+		fmt.Printf(" [x] Received: %s\n", transaction)
 	}
 }

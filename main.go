@@ -14,6 +14,7 @@ const (
 )
 
 func main() {
+
 	// Start publisher in a goroutine
 	publisher := publisher.NewPublisher(amqpURI)
 	// TODO: add wait group
