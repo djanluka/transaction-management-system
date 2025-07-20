@@ -1,13 +1,13 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"sync"
 	"time"
-	"transaction-management-system/transaction"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -17,6 +17,7 @@ import (
 type Database struct {
 	conn                      *sql.DB
 	insertTransactionPrepStmt *sql.Stmt
+	getTransactionsPrepStmt   *sql.Stmt
 }
 
 var (
@@ -28,17 +29,16 @@ var (
 func GetDB() (*Database, error) {
 	var initError error
 
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	// Load mysql connection stirng from .env
-	connectionString := os.Getenv("MYSQL_CONNECTION_URL")
-
 	once.Do(func() {
+		// Load .env file
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		// Load mysql connection stirng from .env
+		connectionString := os.Getenv("MYSQL_CONNECTION_URL")
 
+		// Connect to MySQL database
 		conn, err := sql.Open("mysql", connectionString)
 		if err != nil {
 			initError = fmt.Errorf("failed to open database: %w", err)
@@ -63,10 +63,24 @@ func GetDB() (*Database, error) {
 			initError = fmt.Errorf("failed to prepare insert transaction statement: %w", err)
 			return
 		}
+		// Prepate get transactions statement
+		getTransactionsPrepStmt, err := conn.Prepare(`
+			SELECT user_id, transaction_type, amount, timestamp 
+			FROM casino.transactions 
+			WHERE (? IS NULL OR user_id = ?)
+			AND (? IS NULL OR transaction_type = ?)
+			ORDER BY timestamp DESC
+			LIMIT ?
+		`)
+		if err != nil {
+			initError = fmt.Errorf("failed to prepare get transactions statement: %w", err)
+			return
+		}
 
 		instance = &Database{
 			conn:                      conn,
 			insertTransactionPrepStmt: insertTransactionPrepStmt,
+			getTransactionsPrepStmt:   getTransactionsPrepStmt,
 		}
 	})
 
@@ -74,14 +88,30 @@ func GetDB() (*Database, error) {
 }
 
 // InsertTransaction inserts a new transaction record
-func (db *Database) InsertTransaction(tr *transaction.Transaction) error {
+func (db *Database) InsertTransaction(userId int, transactionType string, amount float64, timestamp time.Time) error {
 	_, err := db.insertTransactionPrepStmt.Exec(
-		tr.UserId,
-		tr.TransactionType,
-		tr.Amount,
-		tr.Timestamp,
+		userId,
+		transactionType,
+		amount,
+		timestamp,
 	)
 	return err
+}
+
+func (db *Database) GetTransactions(ctx context.Context, userId *string, transactionType *string, limit int) (*sql.Rows, error) {
+	var userIdVal, typeVal interface{}
+	if userId != nil {
+		userIdVal = *userId
+	}
+	if transactionType != nil {
+		typeVal = *transactionType
+	}
+
+	rows, err := db.getTransactionsPrepStmt.QueryContext(ctx, userIdVal, userIdVal, typeVal, typeVal, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transactions: %w", err)
+	}
+	return rows, nil
 }
 
 // Close the database connection

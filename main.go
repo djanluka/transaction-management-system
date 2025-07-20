@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"transaction-management-system/consumer"
 	"transaction-management-system/publisher"
+	"transaction-management-system/transaction"
 )
 
 const (
@@ -24,6 +25,11 @@ func main() {
 	consumer := consumer.NewConsumer(amqpURI, queueName)
 	// TODO: add wait group
 	go consumer.Consume(queueName)
+
+	// Start listening transaction api
+	transactioApi := transaction.NewTransactionApi()
+	// TODO: add wait group
+	go transactioApi.ListenAndServe()
 
 	// Wait for interrupt signal to exit
 	sigChan := make(chan os.Signal, 1)

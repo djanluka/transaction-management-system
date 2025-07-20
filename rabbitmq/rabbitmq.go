@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"transaction-management-system/transaction"
 
@@ -19,12 +18,12 @@ type RabbitMQ struct {
 func GetInstance(amqpURI, queueName string) (*RabbitMQ, error) {
 	conn, err := amqp.Dial(amqpURI)
 	if err != nil {
-		return nil, errors.New("failed to connect to RabbitMQ")
+		return nil, fmt.Errorf("failed to connect to RabbitMQ")
 	}
 
 	channel, err := conn.Channel()
 	if err != nil {
-		return nil, errors.New("failed to open a channel")
+		return nil, fmt.Errorf("failed to open a channel")
 	}
 
 	_, err = channel.QueueDeclare(
@@ -36,7 +35,7 @@ func GetInstance(amqpURI, queueName string) (*RabbitMQ, error) {
 		nil,       // arguments
 	)
 	if err != nil {
-		return nil, errors.New("failed to declare a queue")
+		return nil, fmt.Errorf("failed to declare a queue")
 	}
 
 	return &RabbitMQ{
@@ -98,7 +97,7 @@ func (r *RabbitMQ) Consume(queueName string) (<-chan amqp.Delivery, error) {
 		0,     // prefetch size
 		false, // global
 	); err != nil {
-		return nil, errors.New("failed to set Qos")
+		return nil, fmt.Errorf("failed to set Qos")
 	}
 
 	msgs, err := r.channel.Consume(
