@@ -1,6 +1,6 @@
 -- Create the database
-CREATE DATABASE IF NOT EXISTS casino_transactions;
-USE casino_transactions;
+CREATE DATABASE IF NOT EXISTS casino;
+USE casino;
 
 -- Create the transactions table
 CREATE TABLE IF NOT EXISTS transactions (

@@ -12,8 +12,8 @@ type Publisher struct {
 	RabbitMQ *rabbitmq.RabbitMQ
 }
 
-func NewPublisher(amqpURI string) *Publisher {
-	rmq, err := rabbitmq.GetInstance(amqpURI)
+func NewPublisher(amqpURI, queueName string) *Publisher {
+	rmq, err := rabbitmq.GetInstance(amqpURI, queueName)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}

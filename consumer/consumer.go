@@ -14,8 +14,8 @@ type Consumer struct {
 	Database *database.Database
 }
 
-func NewConsumer(amqpURI string) *Consumer {
-	rmq, err := rabbitmq.GetInstance(amqpURI)
+func NewConsumer(amqpURI, queueName string) *Consumer {
+	rmq, err := rabbitmq.GetInstance(amqpURI, queueName)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
@@ -40,12 +40,21 @@ func (c *Consumer) Consume(queueName string) {
 
 	fmt.Println("Consumer started. Waiting for messages...")
 	for msg := range msgs {
+		// Unmarshal body as transaction
 		var transaction transaction.Transaction
 		err := json.Unmarshal(msg.Body, &transaction)
 		if err != nil {
 			log.Printf("Error decoding transaction: %s", err)
 			continue
 		}
+
+		// Insert transaction into database
 		fmt.Printf(" [x] Received: %s\n", transaction)
+		if err := c.Database.InsertTransaction(&transaction); err != nil {
+			msg.Nack(false, true)
+			continue
+		}
+
+		fmt.Printf(" [x] Inserted: %s\n", transaction)
 	}
 }

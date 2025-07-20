@@ -2,8 +2,8 @@ package rabbitmq
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"sync"
 	"transaction-management-system/transaction"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,39 +15,34 @@ type RabbitMQ struct {
 	channel *amqp.Channel
 }
 
-var (
-	instance *RabbitMQ
-	once     sync.Once
-)
-
-// GetInstance returns a singleton instance of RabbitMQ
-func GetInstance(amqpURI string) (*RabbitMQ, error) {
-	var initErr error
-
-	once.Do(func() {
-		conn, err := amqp.Dial(amqpURI)
-		if err != nil {
-			initErr = fmt.Errorf("failed to connect to RabbitMQ: %v", err)
-			return
-		}
-
-		channel, err := conn.Channel()
-		if err != nil {
-			initErr = fmt.Errorf("failed to open a channel: %v", err)
-			return
-		}
-
-		instance = &RabbitMQ{
-			conn:    conn,
-			channel: channel,
-		}
-	})
-
-	if initErr != nil {
-		return nil, initErr
+// GetInstance returns a instance of RabbitMQ
+func GetInstance(amqpURI, queueName string) (*RabbitMQ, error) {
+	conn, err := amqp.Dial(amqpURI)
+	if err != nil {
+		return nil, errors.New("failed to connect to RabbitMQ")
 	}
 
-	return instance, nil
+	channel, err := conn.Channel()
+	if err != nil {
+		return nil, errors.New("failed to open a channel")
+	}
+
+	_, err = channel.QueueDeclare(
+		queueName, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+	if err != nil {
+		return nil, errors.New("failed to declare a queue")
+	}
+
+	return &RabbitMQ{
+		conn:    conn,
+		channel: channel,
+	}, nil
 }
 
 // Close closes the RabbitMQ connection and channel
@@ -70,23 +65,10 @@ func (r *RabbitMQ) Close() error {
 		}
 	}
 
-	instance = nil // Reset instance to allow reconnection if needed
 	return err
 }
 
 func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction) error {
-	_, err := r.channel.QueueDeclare(
-		queueName, // name
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
-	if err != nil {
-		return fmt.Errorf("failed to declare a queue: %v", err)
-	}
-
 	// Marshal to JSON
 	body, err := json.Marshal(transaction)
 	if err != nil {
@@ -99,8 +81,9 @@ func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction
 		false,     // mandatory
 		false,     // immediate
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        []byte(body),
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "application/json",
+			Body:         []byte(body),
 		})
 	if err != nil {
 		return fmt.Errorf("failed to publish a message: %v", err)
@@ -110,16 +93,12 @@ func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction
 }
 
 func (r *RabbitMQ) Consume(queueName string) (<-chan amqp.Delivery, error) {
-	_, err := r.channel.QueueDeclare(
-		queueName, // name
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare a queue: %v", err)
+	if err := r.channel.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	); err != nil {
+		return nil, errors.New("failed to set Qos")
 	}
 
 	msgs, err := r.channel.Consume(

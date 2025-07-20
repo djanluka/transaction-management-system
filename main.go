@@ -9,19 +9,19 @@ import (
 )
 
 const (
-	queueName = "hello"
+	queueName = "casino"
 	amqpURI   = "amqp://guest:guest@localhost:5672/"
 )
 
 func main() {
 
 	// Start publisher in a goroutine
-	publisher := publisher.NewPublisher(amqpURI)
+	publisher := publisher.NewPublisher(amqpURI, queueName)
 	// TODO: add wait group
 	go publisher.StartPublish(queueName)
 
 	// Start consumer in goroutine
-	consumer := consumer.NewConsumer(amqpURI)
+	consumer := consumer.NewConsumer(amqpURI, queueName)
 	// TODO: add wait group
 	go consumer.Consume(queueName)
 
