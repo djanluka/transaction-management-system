@@ -33,7 +33,8 @@ func GetDB() (*Database, error) {
 		// Load .env file
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			initError = fmt.Errorf("failed to load .env file")
+			return
 		}
 		// Load mysql connection stirng from .env
 		connectionString := os.Getenv("MYSQL_CONNECTION_URL")

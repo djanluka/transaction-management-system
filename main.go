@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -30,7 +31,10 @@ func main() {
 	go publisher.StartPublish(ctx, &wg, queueName)
 
 	// Start consumer in goroutine
-	consumer := consumer.NewConsumer(amqpURI, queueName)
+	consumer, err := consumer.NewConsumer(amqpURI, queueName)
+	if err != nil {
+		log.Fatalf("Failed Consumer")
+	}
 	wg.Add(1)
 	go consumer.Consume(ctx, &wg, queueName)
 

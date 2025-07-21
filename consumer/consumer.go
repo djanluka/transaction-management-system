@@ -16,21 +16,21 @@ type Consumer struct {
 	Db       *database.Database
 }
 
-func NewConsumer(amqpURI, queueName string) *Consumer {
+func NewConsumer(amqpURI, queueName string) (*Consumer, error) {
 	rmq, err := rabbitmq.GetInstance(amqpURI, queueName)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, err
 	}
 
 	db, err := database.GetDB()
 	if err != nil {
-		log.Fatalf("Failed to connect to Database: %v", err)
+		return nil, err
 	}
 
 	return &Consumer{
 		RabbitMQ: rmq,
 		Db:       db,
-	}
+	}, nil
 }
 
 func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup, queueName string) {
