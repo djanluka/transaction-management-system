@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
 	"transaction-management-system/database"
@@ -97,7 +98,9 @@ func (tapi *TransactionApi) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/transactions", tapi.GetTransactions)
 }
 
-func (tapi *TransactionApi) ListenAndServe() {
+func (tapi *TransactionApi) ListenAndServe(wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	// Set up router
 	mux := http.NewServeMux()
 	tapi.RegisterRoutes(mux)

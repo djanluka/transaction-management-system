@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"transaction-management-system/transaction"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -45,26 +46,18 @@ func GetInstance(amqpURI, queueName string) (*RabbitMQ, error) {
 }
 
 // Close closes the RabbitMQ connection and channel
-func (r *RabbitMQ) Close() error {
-
-	var err error
+func (r *RabbitMQ) Close() {
 	if r.channel != nil {
 		if closeErr := r.channel.Close(); closeErr != nil {
-			err = fmt.Errorf("channel close error: %v", closeErr)
+			log.Println(closeErr)
 		}
 	}
-
 	if r.conn != nil {
 		if closeErr := r.conn.Close(); closeErr != nil {
-			if err != nil {
-				err = fmt.Errorf("%v, connection close error: %v", err, closeErr)
-			} else {
-				err = fmt.Errorf("connection close error: %v", closeErr)
-			}
+			log.Println(closeErr)
 		}
 	}
-
-	return err
+	log.Println("RabbitMQ closed succesfully")
 }
 
 func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction) error {
