@@ -50,7 +50,10 @@ func (p *Publisher) StartPublish(ctx context.Context, wg *sync.WaitGroup, queueN
 	}
 }
 
-func (p *Publisher) Close() {
-	p.RabbitMQ.Close()
+func (p *Publisher) Close() error {
+	if err := p.RabbitMQ.Close(); err != nil {
+		return err
+	}
 	log.Println("Publisher closed succesfully")
+	return nil
 }
