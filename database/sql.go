@@ -31,7 +31,7 @@ func GetDB() (*Database, error) {
 
 	once.Do(func() {
 		// Load .env file
-		err := godotenv.Load()
+		err := godotenv.Load("../.env")
 		if err != nil {
 			initError = fmt.Errorf("failed to load .env file")
 			return
@@ -116,18 +116,22 @@ func (db *Database) GetTransactions(ctx context.Context, userId *string, transac
 }
 
 // Close the database connection
-func (db *Database) Close() {
+func (db *Database) Close() error {
 	if err := db.insertTransactionPrepStmt.Close(); err != nil {
 		log.Printf("Failed to close insert prepared statement")
+		return err
 	}
 
 	if err := db.getTransactionsPrepStmt.Close(); err != nil {
 		log.Printf("Failed to close insert prepared statement")
+		return err
 	}
 
 	if err := db.conn.Close(); err != nil {
 		log.Printf("Failed to close database")
+		return err
 	}
 
 	log.Println("Database closed succesfully")
+	return nil
 }

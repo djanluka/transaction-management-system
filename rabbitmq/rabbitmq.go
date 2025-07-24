@@ -91,7 +91,7 @@ func (r *RabbitMQ) Consume(queueName string) (<-chan amqp.Delivery, error) {
 		0,     // prefetch size
 		false, // global
 	); err != nil {
-		return nil, fmt.Errorf("failed to set Qos")
+		return nil, err
 	}
 
 	msgs, err := r.channel.Consume(
@@ -104,7 +104,7 @@ func (r *RabbitMQ) Consume(queueName string) (<-chan amqp.Delivery, error) {
 		nil,       // args
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to register a consumer: %v", err)
+		return nil, err
 	}
 
 	return msgs, nil

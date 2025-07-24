@@ -20,15 +20,17 @@ const (
 func main() {
 	var wg sync.WaitGroup
 
+	// Context
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Wait for interrupt signal to exit
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
+
 	// Start publisher in a goroutine
 	publisher, err := publisher.NewPublisher(amqpURI, queueName)
 	if err != nil {
-		log.Fatalf("Failed init Publisher")
+		log.Fatal(err)
 	}
 	wg.Add(1)
 	go publisher.StartPublish(ctx, &wg, queueName)
@@ -36,7 +38,7 @@ func main() {
 	// Start consumer in goroutine
 	consumer, err := consumer.NewConsumer(amqpURI, queueName)
 	if err != nil {
-		log.Fatalf("Failed init Consumer")
+		log.Fatal(err)
 	}
 	wg.Add(1)
 	go consumer.Consume(ctx, &wg, queueName)
@@ -46,6 +48,7 @@ func main() {
 	wg.Add(1)
 	go transactioApi.ListenAndServe(&wg)
 
+	// Exit the application
 	fmt.Println(" [*] Press CTRL+C to exit")
 	<-sigChan
 	cancel()

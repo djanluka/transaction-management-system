@@ -39,7 +39,7 @@ func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup, queueName st
 
 	msgs, err := c.RabbitMQ.Consume(queueName)
 	if err != nil {
-		log.Printf("Failed to start consumer: %v", err)
+		log.Printf("Failed to start consumer: %v\n", err)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup, queueName st
 			var tr transaction.Transaction
 			err := json.Unmarshal(msg.Body, &tr)
 			if err != nil {
-				log.Printf("Error decoding transaction: %s", err)
+				log.Printf("Error decoding transaction: %s\n", err)
 				continue
 			}
 
@@ -68,8 +68,13 @@ func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup, queueName st
 	}
 }
 
-func (c *Consumer) Close() {
-	c.RabbitMQ.Close()
-	c.Db.Close()
+func (c *Consumer) Close() error {
+	if err := c.RabbitMQ.Close(); err != nil {
+		return err
+	}
+	if err := c.Db.Close(); err != nil {
+		return err
+	}
 	log.Println("Consumer closed succesfully")
+	return nil
 }
