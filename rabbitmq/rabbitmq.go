@@ -46,18 +46,19 @@ func GetInstance(amqpURI, queueName string) (*RabbitMQ, error) {
 }
 
 // Close closes the RabbitMQ connection and channel
-func (r *RabbitMQ) Close() {
+func (r *RabbitMQ) Close() error {
 	if r.channel != nil {
 		if closeErr := r.channel.Close(); closeErr != nil {
-			log.Println(closeErr)
+			return closeErr
 		}
 	}
 	if r.conn != nil {
 		if closeErr := r.conn.Close(); closeErr != nil {
-			log.Println(closeErr)
+			return closeErr
 		}
 	}
 	log.Println("RabbitMQ closed succesfully")
+	return nil
 }
 
 func (r *RabbitMQ) Publish(queueName string, transaction transaction.Transaction) error {

@@ -14,15 +14,15 @@ type Publisher struct {
 	RabbitMQ *rabbitmq.RabbitMQ
 }
 
-func NewPublisher(amqpURI, queueName string) *Publisher {
+func NewPublisher(amqpURI, queueName string) (*Publisher, error) {
 	rmq, err := rabbitmq.GetInstance(amqpURI, queueName)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, err
 	}
 
 	return &Publisher{
 		RabbitMQ: rmq,
-	}
+	}, nil
 }
 
 func (p *Publisher) StartPublish(ctx context.Context, wg *sync.WaitGroup, queueName string) {

@@ -26,14 +26,17 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	// Start publisher in a goroutine
-	publisher := publisher.NewPublisher(amqpURI, queueName)
+	publisher, err := publisher.NewPublisher(amqpURI, queueName)
+	if err != nil {
+		log.Fatalf("Failed init Publisher")
+	}
 	wg.Add(1)
 	go publisher.StartPublish(ctx, &wg, queueName)
 
 	// Start consumer in goroutine
 	consumer, err := consumer.NewConsumer(amqpURI, queueName)
 	if err != nil {
-		log.Fatalf("Failed Consumer")
+		log.Fatalf("Failed init Consumer")
 	}
 	wg.Add(1)
 	go consumer.Consume(ctx, &wg, queueName)

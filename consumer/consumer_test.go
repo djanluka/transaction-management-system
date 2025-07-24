@@ -2,31 +2,29 @@ package consumer
 
 import (
 	"testing"
+	"transaction-management-system/test"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewCustomer(t *testing.T) {
-	amqpURI := "amqp://guest:guest@localhost:5672/"
-	wAmqpURI := "amqp://wrongUri"
-	queueName := "casino"
 
 	t.Run("failed to connect to RabbitMQ", func(t *testing.T) {
-		_, err := NewConsumer(wAmqpURI, queueName)
+		_, err := NewConsumer(test.WRONG_AMQP_URI, test.QUEUE_NAME)
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to connect to RabbitMQ")
 	})
 
 	t.Run("failed to connect to DB", func(t *testing.T) {
-		_, err := NewConsumer(amqpURI, queueName)
+		_, err := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to load .env file")
 	})
 
 	t.Run("succesfully created consumer", func(t *testing.T) {
-		c, err := NewConsumer(amqpURI, queueName)
+		c, err := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
 
 		require.NoError(t, err)
 		require.NotNil(t, c)
@@ -34,12 +32,9 @@ func TestNewCustomer(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	amqpURI := "amqp://guest:guest@localhost:5672/"
-	// wAmqpURI := "amqp://wrongUri"
-	queueName := "casino"
 
 	t.Run("succesfully closed consumer", func(t *testing.T) {
-		c, err := NewConsumer(amqpURI, queueName)
+		c, err := NewConsumer(test.AMQP_URI, test.WRONG_QUEUE_NAME)
 		t.Log(err)
 		t.Log(c)
 		// c.Close()
