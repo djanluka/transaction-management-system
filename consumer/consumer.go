@@ -22,7 +22,7 @@ func NewConsumer(amqpURI, queueName string) (*Consumer, error) {
 		return nil, err
 	}
 
-	db, err := database.GetDB()
+	db, err := database.GetDB("casino")
 	if err != nil {
 		return nil, err
 	}

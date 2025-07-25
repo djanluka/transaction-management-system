@@ -26,7 +26,7 @@ var (
 )
 
 // GetDB returns a singleton MySQL database connection
-func GetDB() (*Database, error) {
+func GetDB(schema string) (*Database, error) {
 	var initError error
 
 	once.Do(func() {
@@ -64,20 +64,20 @@ func GetDB() (*Database, error) {
 		conn.SetConnMaxLifetime(5 * time.Minute)
 
 		// Prepare the transaction insert statement
-		insertTransactionPrepStmt, err := conn.Prepare("INSERT INTO casino.transactions (user_id, transaction_type, amount, timestamp) VALUES (?, ?, ?, ?)")
+		insertTransactionPrepStmt, err := conn.Prepare(fmt.Sprintf("INSERT INTO %s.transactions (user_id, transaction_type, amount, timestamp) VALUES (?, ?, ?, ?)", schema))
 		if err != nil {
 			initError = fmt.Errorf("failed to prepare insert transaction statement: %w", err)
 			return
 		}
 		// Prepate get transactions statement
-		getTransactionsPrepStmt, err := conn.Prepare(`
+		getTransactionsPrepStmt, err := conn.Prepare(fmt.Sprintf(`
 			SELECT user_id, transaction_type, amount, timestamp 
-			FROM casino.transactions 
+			FROM %s.transactions 
 			WHERE (? IS NULL OR user_id = ?)
 			AND (? IS NULL OR transaction_type = ?)
 			ORDER BY timestamp DESC
 			LIMIT ?
-		`)
+		`, schema))
 		if err != nil {
 			initError = fmt.Errorf("failed to prepare get transactions statement: %w", err)
 			return

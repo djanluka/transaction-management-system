@@ -1,6 +1,8 @@
-package test
+package config
 
 const (
+	DB_SCHEMA              = "casino"
+	WRONG_DB_SCHEMA        = "wrongDBschema"
 	AMQP_URI               = "amqp://guest:guest@localhost:5672/"
 	QUEUE_NAME             = "casino"
 	WRONG_AMQP_URI         = "amqp://wrongUri"

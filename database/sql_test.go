@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"transaction-management-system/test"
+	test "transaction-management-system/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +27,7 @@ func TestDBInitializationFailure(t *testing.T) {
 	}
 
 	t.Run("succesfull no finding.env file", func(t *testing.T) {
-		_, err := GetDB()
+		_, err := GetDB(test.DB_SCHEMA)
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to load .env file")
 
@@ -40,7 +40,7 @@ func TestGetDBSingleton(t *testing.T) {
 		resetInstance()
 
 		os.Setenv("ENV_PATH", "")
-		_, err := GetDB()
+		_, err := GetDB(test.DB_SCHEMA)
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to load .env file")
@@ -52,7 +52,7 @@ func TestGetDBSingleton(t *testing.T) {
 		resetInstance()
 
 		os.Setenv("MYSQL_CONNECTION_URL", ":@invalid")
-		_, err := GetDB()
+		_, err := GetDB(test.DB_SCHEMA)
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to open database")
@@ -64,7 +64,7 @@ func TestGetDBSingleton(t *testing.T) {
 		resetInstance()
 
 		os.Setenv("MYSQL_CONNECTION_URL", "root:12345@tcp(127.0.0.1:3306)/casino?parseTime=true")
-		_, err := GetDB()
+		_, err := GetDB(test.DB_SCHEMA)
 
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to ping database")
@@ -72,16 +72,24 @@ func TestGetDBSingleton(t *testing.T) {
 		os.Unsetenv("MYSQL_CONNECTION_URL")
 	})
 
+	t.Run("failed prepad statement ", func(t *testing.T) {
+		resetInstance()
+
+		_, err := GetDB(test.WRONG_DB_SCHEMA)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "failed to prepare insert transaction statement")
+	})
+
 	t.Run("succesful singleton pattern", func(t *testing.T) {
 		resetInstance()
 
 		// First call should succeed
-		db1, err := GetDB()
+		db1, err := GetDB(test.DB_SCHEMA)
 		require.NoError(t, err)
 		require.NotNil(t, db1)
 
 		// Second call should return the same instance
-		db2, err := GetDB()
+		db2, err := GetDB(test.DB_SCHEMA)
 		require.NoError(t, err)
 		require.NotNil(t, db2)
 
@@ -93,7 +101,7 @@ func TestGetDBSingleton(t *testing.T) {
 // TestInsertTransaction tests the InsertTransaction method
 func TestInsertTransaction(t *testing.T) {
 
-	db, _ := GetDB()
+	db, _ := GetDB(test.DB_SCHEMA)
 	defer db.Close()
 
 	t.Run("successful insert with valid data", func(t *testing.T) {
@@ -116,7 +124,7 @@ func TestGetTransactions(t *testing.T) {
 	transactionType := test.TRANSACTION_TYPE
 
 	t.Run("successful get transaction", func(t *testing.T) {
-		db, _ := GetDB()
+		db, _ := GetDB(test.DB_SCHEMA)
 		defer db.Close()
 
 		rows, err := db.GetTransactions(t.Context(), &userId, &transactionType, 1)
@@ -127,7 +135,7 @@ func TestGetTransactions(t *testing.T) {
 	})
 
 	t.Run("failed get transaction", func(t *testing.T) {
-		db, _ := GetDB()
+		db, _ := GetDB(test.DB_SCHEMA)
 		db.Close()
 
 		_, err := db.GetTransactions(t.Context(), &userId, &transactionType, 1)
@@ -140,10 +148,11 @@ func TestGetTransactions(t *testing.T) {
 func TestClose(t *testing.T) {
 
 	t.Run("successfully closed", func(t *testing.T) {
-		db, _ := GetDB()
-		db.Close()
+		db, _ := GetDB(test.DB_SCHEMA)
+		err := db.Close()
 
 		require.Nil(t, instance)
+		require.Nil(t, err)
 	})
 
 }

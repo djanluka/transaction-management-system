@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 	"testing"
-	"transaction-management-system/test"
+	test "transaction-management-system/config"
 	"transaction-management-system/transaction"
 
 	"github.com/stretchr/testify/require"

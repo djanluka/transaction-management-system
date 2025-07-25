@@ -5,8 +5,8 @@
 
 # Generate coverage report
 coverage:
-	@echo "Generating coverage report for $(or $(PKG),all packages)..."
-	go test -coverprofile=coverage.out $(or $(PKG),./...)
+	@echo "Generating coverage report for packages"
+	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
@@ -45,13 +45,14 @@ clean:
 # Show help
 help:
 	@echo "Available targets:"
-	@echo "  make test [package]  - Run tests (all or specific package)"
-	@echo "  make coverage [package] - Generate coverage report"
-	@echo "  make start        - Run the application"
-	@echo "  make clean        - Remove generated files"
-	@echo "  make help         - Show this help"
+	@echo "  make test 				- Run tests (all or specific package)"
+	@echo "  make test-{pkg}			- Run tests for package (consumer/database/publisher/etc)"
+	@echo "  make coverage			 	- Generate coverage report"
+	@echo "  make start        			- Run the application"
+	@echo "  make clean        			- Remove generated files"
+	@echo "  make help         			- Show this help"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make test          # Test all packages"
-	@echo "  make test consumer # Test consumer package"
-	@echo "  make coverage repository # Coverage for repository"
+	@echo "  make test 		# Test all packages"
+	@echo "  make test-consumer	# Test consumer package"
+	@echo "  make coverage		# Coverage for repository"

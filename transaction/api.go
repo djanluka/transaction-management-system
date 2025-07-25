@@ -12,6 +12,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"transaction-management-system/config"
 	"transaction-management-system/database"
 )
 
@@ -20,7 +21,7 @@ type TransactionApi struct {
 }
 
 func NewTransactionApi() *TransactionApi {
-	db, err := database.GetDB()
+	db, err := database.GetDB(config.DB_SCHEMA)
 	if err != nil {
 		log.Fatalf("Failed to connect to Database: %v", err)
 	}
