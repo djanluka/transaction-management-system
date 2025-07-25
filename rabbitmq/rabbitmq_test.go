@@ -88,7 +88,7 @@ func TestConsume(t *testing.T) {
 
 		_, err := rmq.Consume(test.QUEUE_NAME)
 		require.Error(t, err)
-		require.ErrorContains(t, err, "failed to set Qos")
+		require.ErrorContains(t, err, "channel/connection is not open")
 	})
 
 	t.Run("failed to read from wrong queue", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestConsume(t *testing.T) {
 
 		_, err := rmq.Consume(test.WRONG_QUEUE_NAME)
 		require.Error(t, err)
-		require.ErrorContains(t, err, "failed to register a consumer")
+		require.ErrorContains(t, err, "NOT_FOUND")
 	})
 	t.Run("succesfully consume", func(t *testing.T) {
 		rmq, _ := GetInstance(test.AMQP_URI, test.QUEUE_NAME)

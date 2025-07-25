@@ -30,8 +30,13 @@ func GetDB() (*Database, error) {
 	var initError error
 
 	once.Do(func() {
+		envPath := os.Getenv("ENV_PATH")
+		if envPath == "" {
+			envPath = ".env" // default
+		}
+
 		// Load .env file
-		err := godotenv.Load("../.env")
+		err := godotenv.Load(envPath)
 		if err != nil {
 			initError = fmt.Errorf("failed to load .env file")
 			return
