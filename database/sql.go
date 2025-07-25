@@ -121,20 +121,24 @@ func (db *Database) GetTransactions(ctx context.Context, userId *int, transactio
 }
 
 // Close the database connection
-func (db *Database) Close() {
+func (db *Database) Close() error {
 	if err := db.insertTransactionPrepStmt.Close(); err != nil {
 		log.Printf("Failed to close insert prepared statement")
+		return err
 	}
 
 	if err := db.getTransactionsPrepStmt.Close(); err != nil {
 		log.Printf("Failed to close insert prepared statement")
+		return err
 	}
 
 	if err := db.conn.Close(); err != nil {
 		log.Printf("Failed to close database")
+		return err
 	}
 
 	instance = nil
 	once = sync.Once{}
 	log.Println("Database closed succesfully")
+	return nil
 }
