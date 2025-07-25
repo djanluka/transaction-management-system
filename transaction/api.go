@@ -36,9 +36,14 @@ func (tapi *TransactionApi) GetTransactions(w http.ResponseWriter, r *http.Reque
 	query := r.URL.Query()
 
 	// Get optional user_id filter
-	var userID *string
+	var userId *int
 	if uid := query.Get("user_id"); uid != "" {
-		userID = &uid
+		user_id, err := strconv.Atoi(uid)
+		if err != nil {
+			http.Error(w, "Invalid user id conversion", http.StatusBadRequest)
+			return
+		}
+		userId = &user_id
 	}
 
 	// Get optional transaction_type filter ("bet", "win", or empty for all)
@@ -64,7 +69,7 @@ func (tapi *TransactionApi) GetTransactions(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Get transactions from database
-	rows, err := tapi.Database.GetTransactions(r.Context(), userID, transactionType, limit)
+	rows, err := tapi.Database.GetTransactions(r.Context(), userId, transactionType, limit)
 	if err != nil {
 		http.Error(w, "Failed to retrieve transactions: "+err.Error(), http.StatusInternalServerError)
 		return
