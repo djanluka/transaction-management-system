@@ -9,20 +9,11 @@ import (
 	"testing"
 	"time"
 	test "transaction-management-system/config"
+	"transaction-management-system/database"
 	"transaction-management-system/transaction"
 
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
-
-func TestMain(m *testing.M) {
-	// Load .env from project root
-	_ = godotenv.Load("../.env")
-
-	// Run tests
-	code := m.Run()
-	os.Exit(code)
-}
 
 func TestNewConsumer(t *testing.T) {
 	t.Run("failed new consumer - wrong amqp uri", func(t *testing.T) {
@@ -37,6 +28,19 @@ func TestNewConsumer(t *testing.T) {
 		require.Error(t, err)
 		require.ErrorContains(t, err, "failed to declare a queue")
 	})
+
+	t.Run("failed new consumer - db", func(t *testing.T) {
+		os.Setenv("ENV_PATH", "")
+
+		_, err := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
+
+		require.Error(t, err)
+		require.ErrorContains(t, err, "failed to load .env file")
+
+		os.Setenv("ENV_PATH", "../.env")
+		database.ResetInstance()
+	})
+
 	t.Run("succesfully created new consumer", func(t *testing.T) {
 		c, err := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
 
@@ -51,18 +55,19 @@ func TestConsume(t *testing.T) {
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
 	defer func() {
-		// Reset log output when test is done
-		log.SetOutput(os.Stderr)
+		log.SetOutput(os.Stderr) // Reset log output when test is done
 	}()
 
 	t.Run("failed consuming", func(t *testing.T) {
 		c, _ := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
 		defer c.Close()
 
+		// Close RabbitMQ before consuming
 		c.RabbitMQ.Close()
 
 		wg.Add(1)
 		go c.Consume(t.Context(), &wg, test.QUEUE_NAME)
+
 		wg.Wait()
 
 		logOutput := buf.String()
@@ -70,7 +75,7 @@ func TestConsume(t *testing.T) {
 			"Expected error log not found in:\n%s", logOutput)
 	})
 
-	t.Run("successfully consumed", func(t *testing.T) {
+	t.Run("failed message processing", func(t *testing.T) {
 		c, _ := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
 		defer c.Close()
 
@@ -79,14 +84,22 @@ func TestConsume(t *testing.T) {
 		ctx, close := context.WithTimeout(t.Context(), 1*time.Second)
 		defer close()
 
+		// Close DB before consuming
+		c.Db.Close()
+
 		wg.Add(1)
 		go c.Consume(ctx, &wg, test.QUEUE_NAME)
 
 		wg.Wait()
+
+		logOutput := buf.String()
+		require.Contains(t, logOutput, "Message has not been processed successfully",
+			"Expected error log not found in:\n%s", logOutput)
 	})
 
 	t.Run("successfully consumed", func(t *testing.T) {
 		c, _ := NewConsumer(test.AMQP_URI, test.QUEUE_NAME)
+		t.Log(c.Db)
 		defer c.Close()
 
 		c.RabbitMQ.Publish(test.QUEUE_NAME, transaction.NewTransaction())
@@ -101,6 +114,8 @@ func TestConsume(t *testing.T) {
 
 		logOutput := buf.String()
 		require.Contains(t, logOutput, "Received",
+			"Expected error log not found in:\n%s", logOutput)
+		require.Contains(t, logOutput, "Inserted",
 			"Expected error log not found in:\n%s", logOutput)
 	})
 

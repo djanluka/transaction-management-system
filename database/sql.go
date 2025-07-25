@@ -137,8 +137,12 @@ func (db *Database) Close() error {
 		return err
 	}
 
-	instance = nil
-	once = sync.Once{}
+	ResetInstance()
 	log.Println("Database closed succesfully")
 	return nil
+}
+
+func ResetInstance() {
+	instance = nil
+	once = sync.Once{}
 }

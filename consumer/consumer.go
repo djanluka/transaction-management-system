@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"transaction-management-system/config"
 	"transaction-management-system/database"
 	"transaction-management-system/rabbitmq"
 	"transaction-management-system/transaction"
@@ -22,7 +23,7 @@ func NewConsumer(amqpURI, queueName string) (*Consumer, error) {
 		return nil, err
 	}
 
-	db, err := database.GetDB("casino")
+	db, err := database.GetDB(config.DB_SCHEMA)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +61,7 @@ func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup, queueName st
 			// Insert transaction into database
 			log.Printf(" [x] Received: %s\n", tr)
 			if err := c.Db.InsertTransaction(tr.UserId, tr.TransactionType, tr.Amount, tr.Timestamp); err != nil {
+				log.Printf(" WARN: Message has not been processed successfully")
 				msg.Nack(false, true)
 				continue
 			}

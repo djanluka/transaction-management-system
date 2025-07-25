@@ -2,7 +2,6 @@ package database
 
 import (
 	"os"
-	"sync"
 	"testing"
 	"time"
 	test "transaction-management-system/config"
@@ -37,7 +36,7 @@ func TestDBInitializationFailure(t *testing.T) {
 // TestGetDBSingleton tests the singleton behavior
 func TestGetDBSingleton(t *testing.T) {
 	t.Run("failed ENV_PATH ", func(t *testing.T) {
-		resetInstance()
+		ResetInstance()
 
 		os.Setenv("ENV_PATH", "")
 		_, err := GetDB(test.DB_SCHEMA)
@@ -49,7 +48,7 @@ func TestGetDBSingleton(t *testing.T) {
 	})
 
 	t.Run("failed invalid mysql connection string", func(t *testing.T) {
-		resetInstance()
+		ResetInstance()
 
 		os.Setenv("MYSQL_CONNECTION_URL", ":@invalid")
 		_, err := GetDB(test.DB_SCHEMA)
@@ -61,7 +60,7 @@ func TestGetDBSingleton(t *testing.T) {
 	})
 
 	t.Run("failed ping", func(t *testing.T) {
-		resetInstance()
+		ResetInstance()
 
 		os.Setenv("MYSQL_CONNECTION_URL", "root:12345@tcp(127.0.0.1:3306)/casino?parseTime=true")
 		_, err := GetDB(test.DB_SCHEMA)
@@ -73,7 +72,7 @@ func TestGetDBSingleton(t *testing.T) {
 	})
 
 	t.Run("failed prepad statement ", func(t *testing.T) {
-		resetInstance()
+		ResetInstance()
 
 		_, err := GetDB(test.WRONG_DB_SCHEMA)
 		require.Error(t, err)
@@ -81,7 +80,7 @@ func TestGetDBSingleton(t *testing.T) {
 	})
 
 	t.Run("succesful singleton pattern", func(t *testing.T) {
-		resetInstance()
+		ResetInstance()
 
 		// First call should succeed
 		db1, err := GetDB(test.DB_SCHEMA)
@@ -155,9 +154,4 @@ func TestClose(t *testing.T) {
 		require.Nil(t, err)
 	})
 
-}
-
-func resetInstance() {
-	instance = nil
-	once = sync.Once{}
 }
