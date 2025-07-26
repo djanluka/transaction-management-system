@@ -20,15 +20,15 @@ type TransactionApi struct {
 	Database *database.Database
 }
 
-func NewTransactionApi() *TransactionApi {
+func NewTransactionApi() (*TransactionApi, error) {
 	db, err := database.GetDB(config.DB_SCHEMA)
 	if err != nil {
-		log.Fatalf("Failed to connect to Database: %v", err)
+		return nil, err
 	}
 
 	return &TransactionApi{
 		Database: db,
-	}
+	}, nil
 }
 
 // GetTransactions handles GET requests for transaction data

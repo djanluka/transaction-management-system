@@ -26,26 +26,26 @@ type Transaction struct {
 
 func NewTransaction() Transaction {
 	return Transaction{
-		UserId:          setUserId(),
-		TransactionType: setTransactionType(),
-		Amount:          setAmount(),
-		Timestamp:       setTimestamp(),
+		UserId:          getUserId(),
+		TransactionType: getTransactionType(),
+		Amount:          getAmount(),
+		Timestamp:       getTimestamp(),
 	}
 }
 
-func setUserId() int {
+func getUserId() int {
 	return rand.Intn(5) + 1
 }
 
-func setTransactionType() string {
+func getTransactionType() string {
 	return TransactionTypes[rand.Intn(len(TransactionTypes))]
 }
 
-func setAmount() float64 {
+func getAmount() float64 {
 	return math.Round(rand.Float64()*100) / 100
 }
 
-func setTimestamp() time.Time {
+func getTimestamp() time.Time {
 	return time.Now()
 }
 

@@ -44,7 +44,10 @@ func main() {
 	go consumer.Consume(ctx, &wg, queueName)
 
 	// Start listening transaction api
-	transactioApi := transaction.NewTransactionApi()
+	transactioApi, err := transaction.NewTransactionApi()
+	if err != nil {
+		log.Fatal(err)
+	}
 	wg.Add(1)
 	go transactioApi.ListenAndServe(&wg)
 
