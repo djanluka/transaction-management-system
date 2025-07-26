@@ -43,6 +43,8 @@ cvr-transaction:
 
 # Run the application
 start:
+	@echo "Pre-init database"
+	mysql < database/init.sql
 	@echo "Starting application..."
 	go run main.go
 
@@ -77,7 +79,8 @@ help:
 	@echo "Available targets:"
 	@echo "  make test 				- Run tests (all or specific package)"
 	@echo "  make test-{pkg}			- Run tests for package (consumer/database/publisher/etc)"
-	@echo "  make coverage			 	- Generate coverage report"
+	@echo "  make cvr			 	- Generate coverage report"
+	@echo "  make cvr-{pkg}			- Generate coverage report for package(consumer/database/publisher/etc)"
 	@echo "  make start        			- Run the application"
 	@echo "  make clean        			- Remove generated files"
 	@echo "  make help         			- Show this help"
@@ -85,4 +88,4 @@ help:
 	@echo "Examples:"
 	@echo "  make test 		# Test all packages"
 	@echo "  make test-consumer	# Test consumer package"
-	@echo "  make coverage		# Coverage for repository"
+	@echo "  make cvr		# Coverage for repository"
