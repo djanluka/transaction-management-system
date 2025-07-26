@@ -7,7 +7,7 @@ Welcome to simple transaction management system for a casino. The system will tr
 - [golang](https://go.dev/)
 - [MySQL](https://documentation.ubuntu.com/server/how-to/databases/install-mysql/)
 - [RabbitMQ](https://www.rabbitmq.com/docs/download)
-- set up `.env` with mysql connection string (see `.env.example`) (`{user}:{password}@tcp(127.0.0.1:3306)/casino?parseTime=true`)
+- set up `.env` with mysql connection string (see `.env.example`) 
 
 RabbitMQ Publisher: Continuously publishes messages at a rate of 1 message per millisecond (it's enough to produce many messages)
 
@@ -57,10 +57,18 @@ To cover sub-package, use:
 
 API provides transactions filtered by user id and transaction type. Additionally limiter provides last N transaction. 
 
-Get all transactions: `curl http://localhost:8080/transactions?`
+Get all transactions: 
 
-Get all user's transactions: `curl http://localhost:8080/transactions?user_id={USER_ID}`
+`curl http://localhost:8080/transactions?`
 
-Get all `bet/win` transactions: `curl http://localhost:8080/transactions?transaction_type={TRANSACTION_TYPE}`
+Get all user's transactions:
 
-Get last N `bet/win` user's transactions: `curl http://localhost:8080/transactions?user_id={USER_ID}&transaction_type={USER_ID}&limit={LIMIT}`
+`curl http://localhost:8080/transactions?user_id={USER_ID}`
+
+Get all `bet/win` transactions:
+
+`curl http://localhost:8080/transactions?transaction_type={TRANSACTION_TYPE}`
+
+Get last N `bet/win` user's transactions:
+
+`curl http://localhost:8080/transactions?user_id={USER_ID}&transaction_type={USER_ID}&limit={LIMIT}`
