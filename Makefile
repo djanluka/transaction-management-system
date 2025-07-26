@@ -52,6 +52,9 @@ start:
 test:
 	@echo "Running tests for all packages"
 	ENV_PATH=../.env go test -v -cover ./...
+test-cover:
+	@echo "Running tests for all packages"
+	ENV_PATH=../.env go test -cover ./...
 test-consumer:
 	@echo "Running tests for consumer"
 	ENV_PATH=../.env go test -v -cover ./consumer
@@ -78,6 +81,7 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  make test 				- Run tests (all or specific package)"
+	@echo "  make test-cover 				- Run tests and print coverage percentage"
 	@echo "  make test-{pkg}			- Run tests for package (consumer/database/publisher/etc)"
 	@echo "  make cvr			 	- Generate coverage report"
 	@echo "  make cvr-{pkg}			- Generate coverage report for package(consumer/database/publisher/etc)"

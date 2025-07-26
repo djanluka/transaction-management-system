@@ -1,12 +1,16 @@
 ### Test
 
-The application can be tested using: 
+To test application run: 
 
 `make test`
 
-The sub-packages can be tested using:
+To test sub-packages (e.g consumer) run:
 
 `make test-{pkg}`. (e.g, `make test-consumer`)
+
+To see the coverage percentage run:
+
+`make test-cover`
 
 ### Coverage
 
