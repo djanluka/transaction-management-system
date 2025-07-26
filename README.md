@@ -1,11 +1,19 @@
 ### Test
-`ENV_PATH=../.env go test ./...`
 
-Testing with coverage:
-`ENV_PATH=../.env go test -cover ./...`
+The application can be tested using: 
 
-Testing with vendor:
-`ENV_PATH=../.env go test -v ./...`
+`make test`
 
-Testing with vendor and coverage:
-`ENV_PATH=../.env go test -v -cover ./...`
+The sub-packages can be tested using:
+
+`make test-{pkg}`. (e.g, `make test-consumer`)
+
+### Coverage
+
+The application coverage is available by:
+
+`make coverage`
+
+To cover sub-package, use:
+
+`make cvr-{pkg}` (e.g, `make cvr-consumer`)

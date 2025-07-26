@@ -4,37 +4,37 @@
 .DEFAULT_GOAL := help
 
 # Generate coverage report
-coverage:
+cvr:
 	@echo "Generating coverage report for packages"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-coverage-consumer:
+cvr-consumer:
 	@echo "Generating coverage report for consumer"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./consumer
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-coverage-database:
+cvr-database:
 	@echo "Generating coverage report for database"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./database
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-coverage-publisher:
+cvr-publisher:
 	@echo "Generating coverage report for publisher"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./publisher
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-coverage-rabbitmq:
+cvr-rabbitmq:
 	@echo "Generating coverage report for rabbitmq"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./rabbitmq
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-coverage-transaction:
+cvr-transaction:
 	@echo "Generating coverage report for transaction"
 	ENV_PATH=../.env go test -coverprofile=coverage.out ./transaction
 	go tool cover -html=coverage.out -o coverage.html
