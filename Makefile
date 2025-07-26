@@ -44,7 +44,7 @@ cvr-transaction:
 # Run the application
 start:
 	@echo "Pre-init database"
-	mysql < database/init.sql
+	mysql < database/migrations/init.sql
 	@echo "Starting application..."
 	go run main.go
 
