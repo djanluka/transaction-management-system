@@ -34,12 +34,15 @@ cvr-rabbitmq:
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Opening coverage report..."
 	open coverage.html
-cvr-transaction:
-	@echo "Generating coverage report for transaction"
-	ENV_PATH=../.env go test -coverprofile=coverage.out ./transaction
-	go tool cover -html=coverage.out -o coverage.html
-	@echo "Opening coverage report..."
-	open coverage.html
+
+# This cover test fails due to 'signal: terminated' that is used for graceful shutdown test
+# 'make test-transaction' passes well
+# cvr-transaction:
+# 	@echo "Generating coverage report for transaction"
+# 	ENV_PATH=../.env go test -coverprofile=coverage.out ./transaction
+# 	go tool cover -html=coverage.out -o coverage.html
+# 	@echo "Opening coverage report..."
+# 	open coverage.html
 
 # Run the application
 start:
@@ -72,6 +75,12 @@ test-transaction:
 	ENV_PATH=../.env go test -v -cover ./transaction
 
 
+# Reset the database table
+reset:
+	@echo "Reset mysql casino table"
+	mysql < database/migrations/reset.sql
+
+
 # Clean up generated files
 clean:
 	@echo "Cleaning up..."
@@ -81,11 +90,12 @@ clean:
 help:
 	@echo "Available targets:"
 	@echo "  make test 				- Run tests (all or specific package)"
-	@echo "  make test-cover 				- Run tests and print coverage percentage"
+	@echo "  make test-cover 			- Run tests and print coverage percentage"
 	@echo "  make test-{pkg}			- Run tests for package (consumer/database/publisher/etc)"
 	@echo "  make cvr			 	- Generate coverage report"
 	@echo "  make cvr-{pkg}			- Generate coverage report for package(consumer/database/publisher/etc)"
 	@echo "  make start        			- Run the application"
+	@echo "  make reset        			- Truncate the database table"
 	@echo "  make clean        			- Remove generated files"
 	@echo "  make help         			- Show this help"
 	@echo ""
