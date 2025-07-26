@@ -29,7 +29,7 @@ func (p *Publisher) StartPublish(ctx context.Context, wg *sync.WaitGroup, queueN
 	defer wg.Done()
 	defer p.Close()
 
-	publishingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	publishingCtx, cancel := context.WithTimeout(ctx, 1*time.Millisecond)
 	defer cancel()
 	for {
 		select {
@@ -45,7 +45,6 @@ func (p *Publisher) StartPublish(ctx context.Context, wg *sync.WaitGroup, queueN
 				continue
 			}
 			fmt.Printf(" [x] Sent: %s\n", transaction)
-			time.Sleep(1 * time.Second)
 		}
 	}
 }
