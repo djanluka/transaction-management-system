@@ -23,6 +23,10 @@ Start the program using just one command!
 
 `make start`
 
+To see all available commands, run:
+
+`make help`
+
 ### 💡 Improvements
 
 - Dockerize the application and use containerized MySQL and RabbitMQ
