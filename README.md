@@ -75,4 +75,4 @@ Get all `bet/win` transactions:
 
 Get last N `bet/win` user's transactions:
 
-`curl http://localhost:8080/transactions?user_id={USER_ID}&transaction_type={USER_ID}&limit={LIMIT}`
+`curl http://localhost:8080/transactions?user_id={USER_ID}&transaction_type={TRANSACTION_TYPE}&limit={LIMIT}`
