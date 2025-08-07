@@ -9,7 +9,7 @@ Welcome to simple transaction management system for a casino. The system will tr
 - [RabbitMQ](https://www.rabbitmq.com/docs/download)
 - set up `.env` with mysql connection string (see `.env.example`) 
 
-RabbitMQ Publisher: Continuously publishes messages at a rate of 1 message per millisecond (it's enough to produce many messages)
+RabbitMQ Publisher: Continuously publishes messages with a period of 1 millisecond (it's enough to produce many messages)
 
 RabbitMQ Consumer: Receives, processes, and stores messages in a MySQL database
 
